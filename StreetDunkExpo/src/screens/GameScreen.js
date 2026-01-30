@@ -12,25 +12,19 @@ const GameScreen = () => {
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [gameState, setGameState] = useState('ready'); // ready, running, dribbling, dunking, layup
-  const [playerPosition, setPlayerPosition] = useState({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT * 0.7 });
-  const [ballPosition, setBallPosition] = useState({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT * 0.65 });
+  const [playerPosition, setPlayerPosition] = useState({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT * 0.5 });
+  const [ballPosition, setBallPosition] = useState({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT * 0.45 });
   const [direction, setDirection] = useState('right');
   const [isMoving, setIsMoving] = useState(null);
   const [nearHoop, setNearHoop] = useState(null); // 'left', 'right', or null
   
   const moveIntervalRef = useRef(null);
-  const playerPositionRef = useRef(playerPosition);
-
-  // Update position ref when position changes
-  useEffect(() => {
-    playerPositionRef.current = playerPosition;
-  }, [playerPosition]);
 
   // Check if player is near a hoop
   useEffect(() => {
-    const leftHoopX = 83;
-    const rightHoopX = SCREEN_WIDTH - 83;
-    const hoopRange = 60;
+    const leftHoopX = SCREEN_WIDTH * 0.125;
+    const rightHoopX = SCREEN_WIDTH * 0.875;
+    const hoopRange = 50;
 
     if (Math.abs(playerPosition.x - leftHoopX) < hoopRange) {
       setNearHoop('left');
@@ -53,9 +47,10 @@ const GameScreen = () => {
 
     moveIntervalRef.current = setInterval(() => {
       setPlayerPosition(prev => {
-        const newX = Math.max(60, prev.x - 8);
-        const newBallX = gameState === 'dribbling' ? newX : ballPosition.x;
-        setBallPosition(prevBall => ({ ...prevBall, x: newBallX }));
+        const newX = Math.max(SCREEN_WIDTH * 0.1, prev.x - 6);
+        if (gameState === 'dribbling') {
+          setBallPosition(prevBall => ({ ...prevBall, x: newX }));
+        }
         return { ...prev, x: newX };
       });
     }, 50);
@@ -73,9 +68,10 @@ const GameScreen = () => {
 
     moveIntervalRef.current = setInterval(() => {
       setPlayerPosition(prev => {
-        const newX = Math.min(SCREEN_WIDTH - 60, prev.x + 8);
-        const newBallX = gameState === 'dribbling' ? newX : ballPosition.x;
-        setBallPosition(prevBall => ({ ...prevBall, x: newBallX }));
+        const newX = Math.min(SCREEN_WIDTH * 0.9, prev.x + 6);
+        if (gameState === 'dribbling') {
+          setBallPosition(prevBall => ({ ...prevBall, x: newX }));
+        }
         return { ...prev, x: newX };
       });
     }, 50);
@@ -92,12 +88,8 @@ const GameScreen = () => {
     }
   };
 
-  // Stop movement when touch ends
+  // Stop movement when component unmounts
   useEffect(() => {
-    const handleTouchEnd = () => {
-      stopMovement();
-    };
-
     return () => {
       if (moveIntervalRef.current) {
         clearInterval(moveIntervalRef.current);
@@ -109,11 +101,11 @@ const GameScreen = () => {
     if (gameState === 'ready' || gameState === 'running') {
       setGameState('dribbling');
       // Update ball position to follow player
-      setBallPosition({ x: playerPosition.x, y: playerPosition.y - 5 });
+      setBallPosition({ x: playerPosition.x, y: playerPosition.y - 10 });
       
       setTimeout(() => {
+        setCombo(prev => prev + 0.5);
         if (gameState === 'dribbling') {
-          setCombo(prev => prev + 0.5);
           setGameState('ready');
         }
       }, 2000);
@@ -127,8 +119,8 @@ const GameScreen = () => {
       setGameState('dunking');
       
       // Move ball to hoop position
-      const hoopX = nearHoop === 'left' ? 83 : SCREEN_WIDTH - 83;
-      setBallPosition({ x: hoopX, y: SCREEN_HEIGHT * 0.47 });
+      const hoopX = nearHoop === 'left' ? SCREEN_WIDTH * 0.125 : SCREEN_WIDTH * 0.875;
+      setBallPosition({ x: hoopX, y: SCREEN_HEIGHT * 0.25 });
       
       setTimeout(() => {
         const dunkPoints = 300 * (combo + 1);
@@ -137,8 +129,8 @@ const GameScreen = () => {
         setGameState('ready');
         
         // Reset ball position
-        setBallPosition({ x: playerPosition.x, y: playerPosition.y - 5 });
-      }, 1600);
+        setBallPosition({ x: playerPosition.x, y: playerPosition.y - 10 });
+      }, 1300);
     }
   };
 
@@ -147,8 +139,8 @@ const GameScreen = () => {
       setGameState('layup');
       
       // Move ball to hoop position
-      const hoopX = nearHoop === 'left' ? 83 : SCREEN_WIDTH - 83;
-      setBallPosition({ x: hoopX, y: SCREEN_HEIGHT * 0.47 });
+      const hoopX = nearHoop === 'left' ? SCREEN_WIDTH * 0.125 : SCREEN_WIDTH * 0.875;
+      setBallPosition({ x: hoopX, y: SCREEN_HEIGHT * 0.25 });
       
       setTimeout(() => {
         const layupPoints = 150 * (combo + 1);
@@ -157,8 +149,8 @@ const GameScreen = () => {
         setGameState('ready');
         
         // Reset ball position
-        setBallPosition({ x: playerPosition.x, y: playerPosition.y - 5 });
-      }, 1000);
+        setBallPosition({ x: playerPosition.x, y: playerPosition.y - 10 });
+      }, 800);
     }
   };
 
@@ -197,6 +189,7 @@ const GameScreen = () => {
         onDribble={handleDribble}
         gameState={gameState}
         isMoving={isMoving}
+        stopMovement={stopMovement}
       />
       
       {/* Hoop indicator */}
@@ -204,8 +197,8 @@ const GameScreen = () => {
         <View style={[
           styles.hoopIndicator,
           { 
-            left: nearHoop === 'left' ? 50 : SCREEN_WIDTH - 100,
-            top: SCREEN_HEIGHT * 0.3 
+            left: nearHoop === 'left' ? SCREEN_WIDTH * 0.05 : SCREEN_WIDTH * 0.8,
+            top: SCREEN_HEIGHT * 0.15 
           }
         ]}>
           <View style={styles.hoopIndicatorText}>

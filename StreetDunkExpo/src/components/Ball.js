@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
-import Svg, { Circle, Line, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
+import { StyleSheet, Animated, Dimensions } from 'react-native';
+import Svg, { Circle, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -18,7 +18,7 @@ const Ball = ({ position, gameState }) => {
         Animated.sequence([
           Animated.parallel([
             Animated.timing(bounceAnim, {
-              toValue: -30,
+              toValue: -15,
               duration: 200,
               useNativeDriver: true,
             }),
@@ -28,7 +28,7 @@ const Ball = ({ position, gameState }) => {
               useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-              toValue: 0.5,
+              toValue: 0.6,
               duration: 200,
               useNativeDriver: true,
             }),
@@ -62,26 +62,28 @@ const Ball = ({ position, gameState }) => {
       Animated.loop(
         Animated.timing(spinAnim, {
           toValue: 360,
-          duration: 800,
+          duration: 600,
           useNativeDriver: true,
         })
       ).start();
     } else if (gameState === 'dunking') {
       // Epic dunk trajectory
+      const hoopY = SCREEN_HEIGHT * 0.25;
+      
       Animated.sequence([
         // Arc to hoop
         Animated.parallel([
           Animated.timing(ballAnim, {
             toValue: { 
-              x: SCREEN_WIDTH / 2 - position.x, 
-              y: SCREEN_HEIGHT * 0.18 - position.y 
+              x: 0,
+              y: hoopY - position.y - 20
             },
-            duration: 1400,
+            duration: 700,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
             toValue: 1.3,
-            duration: 700,
+            duration: 350,
             useNativeDriver: true,
           }),
         ]),
@@ -89,8 +91,64 @@ const Ball = ({ position, gameState }) => {
         Animated.parallel([
           Animated.timing(ballAnim, {
             toValue: { 
-              x: SCREEN_WIDTH / 2 - position.x, 
-              y: SCREEN_HEIGHT * 0.25 - position.y 
+              x: 0,
+              y: hoopY - position.y + 12
+            },
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Reset
+        Animated.timing(ballAnim, {
+          toValue: { x: 0, y: 0 },
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Fast spin during dunk
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 360,
+          duration: 100,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Reset spin after dunk
+      setTimeout(() => {
+        spinAnim.setValue(0);
+      }, 1300);
+    } else if (gameState === 'layup') {
+      // Layup trajectory
+      const hoopY = SCREEN_HEIGHT * 0.25;
+      
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(ballAnim, {
+            toValue: { 
+              x: 0,
+              y: hoopY - position.y - 12
+            },
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1.1,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ballAnim, {
+            toValue: { 
+              x: 0,
+              y: hoopY - position.y + 6
             },
             duration: 300,
             useNativeDriver: true,
@@ -109,55 +167,10 @@ const Ball = ({ position, gameState }) => {
         }),
       ]).start();
 
-      // Fast spin during dunk
-      Animated.loop(
-        Animated.timing(spinAnim, {
-          toValue: 360,
-          duration: 150,
-          useNativeDriver: true,
-        })
-      ).start();
-
-      // Reset spin after dunk
-      setTimeout(() => {
-        spinAnim.setValue(0);
-      }, 2000);
-    } else if (gameState === 'layup') {
-      // Layup trajectory
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(ballAnim, {
-            toValue: { 
-              x: SCREEN_WIDTH / 2 - position.x + 20, 
-              y: SCREEN_HEIGHT * 0.19 - position.y 
-            },
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1.2,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(ballAnim, {
-            toValue: { x: 0, y: 0 },
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
-
       // Moderate spin for layup
       Animated.timing(spinAnim, {
         toValue: 180,
-        duration: 1000,
+        duration: 800,
         useNativeDriver: true,
       }).start(() => {
         spinAnim.setValue(0);
@@ -170,8 +183,8 @@ const Ball = ({ position, gameState }) => {
       style={[
         styles.container,
         {
-          left: position.x - 18,
-          top: position.y - 18,
+          left: position.x - 12,
+          top: position.y - 12,
           transform: [
             { translateX: ballAnim.x },
             { translateY: Animated.add(ballAnim.y, bounceAnim) },
@@ -193,15 +206,15 @@ const Ball = ({ position, gameState }) => {
             transform: [
               { scaleX: scaleAnim },
               { scaleY: shadowAnim.interpolate({
-                inputRange: [0.5, 1],
-                outputRange: [1.5, 1]
+                inputRange: [0.6, 1],
+                outputRange: [1.4, 1]
               })}
             ]
           }
         ]}
       />
       
-      <Svg width={30} height={30}>
+      <Svg width={24} height={24}>
         <Defs>
           {/* Basketball gradient */}
           <RadialGradient id="ballGradient" cx="35%" cy="35%">
@@ -213,9 +226,9 @@ const Ball = ({ position, gameState }) => {
         
         {/* Basketball sphere */}
         <Circle 
-          cx={15} 
-          cy={15} 
-          r={12} 
+          cx={12} 
+          cy={12} 
+          r={10} 
           fill="url(#ballGradient)"
           stroke="#d35400"
           strokeWidth={1}
@@ -223,13 +236,13 @@ const Ball = ({ position, gameState }) => {
         
         {/* Basketball seam lines */}
         <Path 
-          d="M 3 15 Q 15 6 27 15 Q 15 24 3 15"
+          d="M 2 12 Q 12 4 22 12 Q 12 20 2 12"
           stroke="#d35400" 
           strokeWidth={1.5}
           fill="none"
         />
         <Path 
-          d="M 15 3 Q 6 15 15 27 Q 24 15 15 3"
+          d="M 12 2 Q 4 12 12 22 Q 20 12 12 2"
           stroke="#d35400" 
           strokeWidth={1.5}
           fill="none"
@@ -237,9 +250,9 @@ const Ball = ({ position, gameState }) => {
         
         {/* Highlight for 3D effect */}
         <Circle 
-          cx={18} 
-          cy={12} 
-          r={3} 
+          cx={15} 
+          cy={9} 
+          r={2.5} 
           fill="#f1c40f"
           opacity={0.3}
         />
@@ -255,12 +268,12 @@ const styles = StyleSheet.create({
   },
   shadow: {
     position: 'absolute',
-    bottom: -20,
-    left: 8,
-    width: 20,
-    height: 6,
+    bottom: -12,
+    left: 4,
+    width: 16,
+    height: 4,
     backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 10,
+    borderRadius: 8,
   },
 });
 

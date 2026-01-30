@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gameState, isMoving }) => {
+const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gameState, isMoving, stopMovement }) => {
   return (
     <View style={styles.container}>
       {/* Movement Controls */}
@@ -13,7 +13,7 @@ const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gam
             isMoving === 'left' && styles.activeButton
           ]}
           onPressIn={onMoveLeft}
-          onPressOut={() => {}}
+          onPressOut={stopMovement}
         >
           <Text style={styles.moveButtonText}>⬅️</Text>
         </TouchableOpacity>
@@ -41,7 +41,7 @@ const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gam
             isMoving === 'right' && styles.activeButton
           ]}
           onPressIn={onMoveRight}
-          onPressOut={() => {}}
+          onPressOut={stopMovement}
         >
           <Text style={styles.moveButtonText}>➡️</Text>
         </TouchableOpacity>

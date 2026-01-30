@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import Svg, { Circle, Rect, Path, Ellipse, Polygon } from 'react-native-svg';
+import Svg, { Circle, Rect, Path, Ellipse, Line } from 'react-native-svg';
 
-const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' }) => {
+const Player = ({ position, gameState, direction = 'right' }) => {
   const jumpAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const armAnim = useRef(new Animated.Value(0)).current;
-  const legAnim = useRef(new Animated.Value(0)).current;
   const dribbleAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const runAnim = useRef(new Animated.Value(0)).current;
@@ -18,12 +17,12 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
         Animated.sequence([
           Animated.timing(runAnim, {
             toValue: 1,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
           Animated.timing(runAnim, {
             toValue: 0,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
         ])
@@ -34,12 +33,12 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
         Animated.sequence([
           Animated.timing(dribbleAnim, {
             toValue: 1,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
           Animated.timing(dribbleAnim, {
             toValue: 0,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
         ])
@@ -50,24 +49,24 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
         // Crouch before jump
         Animated.timing(scaleAnim, {
           toValue: 0.8,
-          duration: 200,
+          duration: 150,
           useNativeDriver: true,
         }),
-        // Explosive jump
+        // Explosive jump with spin
         Animated.parallel([
           Animated.timing(jumpAnim, {
-            toValue: -120,
-            duration: 800,
+            toValue: -100,
+            duration: 700,
             useNativeDriver: true,
           }),
           Animated.timing(rotateAnim, {
             toValue: direction === 'right' ? 360 : -360,
-            duration: 1200,
+            duration: 1000,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
-            toValue: 1.2,
-            duration: 400,
+            toValue: 1.3,
+            duration: 350,
             useNativeDriver: true,
           }),
         ]),
@@ -75,12 +74,12 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
         Animated.parallel([
           Animated.timing(jumpAnim, {
             toValue: 0,
-            duration: 400,
+            duration: 300,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
             toValue: 1,
-            duration: 300,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
@@ -92,25 +91,25 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
       Animated.sequence([
         Animated.parallel([
           Animated.timing(jumpAnim, {
-            toValue: -80,
-            duration: 600,
+            toValue: -60,
+            duration: 500,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
             toValue: 1,
-            duration: 400,
+            duration: 300,
             useNativeDriver: true,
           }),
         ]),
         Animated.parallel([
           Animated.timing(jumpAnim, {
             toValue: 0,
-            duration: 400,
+            duration: 300,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
             toValue: 0,
-            duration: 300,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
@@ -118,31 +117,24 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
     }
   }, [gameState, direction]);
 
-  const getRunTransform = () => {
+  const getRunBounce = () => {
     return runAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, -5]
+      outputRange: [0, -3]
     });
   };
 
-  const getDribbleTransform = () => {
+  const getDribbleBounce = () => {
     return dribbleAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, -8]
+      outputRange: [0, -5]
     });
   };
 
   const getArmRotation = () => {
     return armAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0deg', direction === 'right' ? '45deg' : '-45deg']
-    });
-  };
-
-  const getLegRotation = () => {
-    return runAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '15deg']
+      outputRange: ['0deg', direction === 'right' ? '30deg' : '-30deg']
     });
   };
 
@@ -151,10 +143,10 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
       style={[
         styles.container,
         {
-          left: position.x - 25,
-          top: position.y - 50,
+          left: position.x - 20,
+          top: position.y - 45,
           transform: [
-            { translateY: Animated.add(jumpAnim, getRunTransform()) },
+            { translateY: Animated.add(jumpAnim, getRunBounce()) },
             { rotate: rotateAnim.interpolate({
               inputRange: [0, 360],
               outputRange: ['0deg', '360deg']
@@ -165,177 +157,162 @@ const Player = ({ position, gameState, moveType = 'dunk', direction = 'right' })
         }
       ]}
     >
-      <Svg width={50} height={60}>
+      <Svg width={40} height={50}>
         {/* Player Shadow */}
         <Ellipse 
-          cx={25} 
-          cy={55} 
-          rx={12} 
-          ry={3} 
+          cx={20} 
+          cy={47} 
+          rx={10} 
+          ry={2} 
           fill="rgba(0,0,0,0.3)"
         />
         
-        {/* Legs with running animation */}
-        <Animated.View style={{ transform: [{ rotate: getLegRotation() }] }}>
-          <Rect 
-            x={18} 
-            y={35} 
-            width={5} 
-            height={18} 
-            fill="#2c3e50"
-            rx={2}
-          />
-          <Rect 
-            x={27} 
-            y={35} 
-            width={5} 
-            height={18} 
-            fill="#2c3e50"
-            rx={2}
-          />
-        </Animated.View>
+        {/* Legs */}
+        <Rect 
+          x={15} 
+          y={30} 
+          width={4} 
+          height={15} 
+          fill="#2c3e50"
+          rx={2}
+        />
+        <Rect 
+          x={21} 
+          y={30} 
+          width={4} 
+          height={15} 
+          fill="#2c3e50"
+          rx={2}
+        />
         
         {/* Shoes */}
         <Ellipse 
-          cx={20} 
-          cy={55} 
-          rx={6} 
-          ry={3} 
+          cx={17} 
+          cy={46} 
+          rx={5} 
+          ry={2} 
           fill="#e74c3c"
         />
         <Ellipse 
-          cx={30} 
-          cy={55} 
-          rx={6} 
-          ry={3} 
+          cx={23} 
+          cy={46} 
+          rx={5} 
+          ry={2} 
           fill="#e74c3c"
         />
         
         {/* Jersey/Body */}
         <Rect 
-          x={15} 
-          y={20} 
-          width={20} 
-          height={20} 
+          x={12} 
+          y={15} 
+          width={16} 
+          height={18} 
           fill="#3498db"
-          rx={3}
+          rx={2}
         />
         
         {/* Jersey Number */}
         <Circle 
-          cx={25} 
-          cy={28} 
-          r={5} 
+          cx={20} 
+          cy={22} 
+          r={4} 
           fill="#ecf0f1"
         />
         <Circle 
-          cx={25} 
-          cy={28} 
-          r={3} 
+          cx={20} 
+          cy={22} 
+          r={2} 
           fill="#3498db"
         />
         
-        {/* Arms with movement */}
+        {/* Arms with animation */}
         <Animated.View style={{ transform: [{ rotate: getArmRotation() }] }}>
           {/* Left arm */}
           <Rect 
-            x={8} 
-            y={22} 
-            width={12} 
-            height={4} 
+            x={6} 
+            y={17} 
+            width={10} 
+            height={3} 
             fill="#f39c12"
-            rx={2}
+            rx={1}
           />
           {/* Right arm */}
           <Rect 
-            x={30} 
-            y={22} 
-            width={12} 
-            height={4} 
+            x={24} 
+            y={17} 
+            width={10} 
+            height={3} 
             fill="#f39c12"
-            rx={2}
+            rx={1}
           />
         </Animated.View>
         
         {/* Hands */}
         <Circle 
-          cx={6} 
-          cy={24} 
-          r={3} 
+          cx={4} 
+          cy={18} 
+          r={2} 
           fill="#f39c12"
         />
         <Circle 
-          cx={44} 
-          cy={24} 
-          r={3} 
+          cx={36} 
+          cy={18} 
+          r={2} 
           fill="#f39c12"
         />
         
         {/* Head */}
         <Circle 
-          cx={25} 
-          cy={15} 
-          r={8} 
+          cx={20} 
+          cy={12} 
+          r={6} 
           fill="#f39c12"
         />
         
         {/* Hair */}
         <Path 
-          d="M17 10 Q25 5 33 10 Q29 8 25 8 Q21 8 17 10"
+          d="M14 8 Q20 4 26 8 Q23 6 20 6 Q17 6 14 8"
           fill="#2c3e50"
         />
         
         {/* Eyes */}
         <Circle 
-          cx={22} 
-          cy={13} 
-          r={1} 
+          cx={18} 
+          cy={11} 
+          r={0.8} 
           fill="#2c3e50"
         />
         <Circle 
-          cx={28} 
-          cy={13} 
-          r={1} 
+          cx={22} 
+          cy={11} 
+          r={0.8} 
           fill="#2c3e50"
         />
         
         {/* Mouth */}
         <Path 
-          d="M22 17 Q25 19 28 17"
+          d="M18 14 Q20 15 22 14"
           stroke="#2c3e50"
-          strokeWidth={1}
+          strokeWidth={0.8}
           fill="none"
         />
-        
-        {/* Dribbling motion indicator */}
-        {gameState === 'dribbling' && (
-          <Animated.View style={{ transform: [{ translateY: getDribbleTransform() }] }}>
-            <Circle 
-              cx={direction === 'right' ? 35 : 15} 
-              cy={45} 
-              r={2} 
-              fill="#e67e22"
-              opacity={0.7}
-            />
-          </Animated.View>
-        )}
         
         {/* Speed lines when running */}
         {gameState === 'running' && (
           <>
             <Line 
-              x1={direction === 'right' ? 5 : 45} 
-              y1={20} 
-              x2={direction === 'right' ? 0 : 50} 
-              y2={18} 
+              x1={direction === 'right' ? 2 : 38} 
+              y1={15} 
+              x2={direction === 'right' ? -2 : 42} 
+              y2={13} 
               stroke="rgba(255,255,255,0.6)" 
-              strokeWidth={2}
+              strokeWidth={1.5}
             />
             <Line 
-              x1={direction === 'right' ? 8 : 42} 
-              y1={30} 
-              x2={direction === 'right' ? 3 : 47} 
-              y2={28} 
+              x1={direction === 'right' ? 4 : 36} 
+              y1={25} 
+              x2={direction === 'right' ? 0 : 40} 
+              y2={23} 
               stroke="rgba(255,255,255,0.4)" 
               strokeWidth={1}
             />

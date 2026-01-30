@@ -1,12 +1,15 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import GameScreen from './src/screens/GameScreen';
 
 const App = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <GameScreen />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <GameScreen />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
