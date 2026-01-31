@@ -10,49 +10,50 @@ const Ball = ({ position, gameState }) => {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (gameState === 'dribbling') {
-      // Dribbling bounce animation
+      // Enhanced dribbling with realistic physics
       Animated.loop(
         Animated.sequence([
           Animated.parallel([
             Animated.timing(bounceAnim, {
-              toValue: -15,
-              duration: 200,
+              toValue: -20,
+              duration: 180,
               useNativeDriver: true,
             }),
             Animated.timing(scaleAnim, {
-              toValue: 0.9,
-              duration: 100,
+              toValue: 0.85,
+              duration: 90,
               useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-              toValue: 0.6,
-              duration: 200,
+              toValue: 0.5,
+              duration: 180,
               useNativeDriver: true,
             }),
           ]),
           Animated.parallel([
             Animated.timing(bounceAnim, {
               toValue: 0,
-              duration: 200,
+              duration: 180,
               useNativeDriver: true,
             }),
             Animated.timing(scaleAnim, {
-              toValue: 1.1,
-              duration: 100,
+              toValue: 1.15,
+              duration: 90,
               useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-              toValue: 1,
-              duration: 200,
+              toValue: 1.2,
+              duration: 180,
               useNativeDriver: true,
             }),
           ]),
           Animated.timing(scaleAnim, {
             toValue: 1,
-            duration: 100,
+            duration: 90,
             useNativeDriver: true,
           }),
         ])
@@ -62,37 +63,53 @@ const Ball = ({ position, gameState }) => {
       Animated.loop(
         Animated.timing(spinAnim, {
           toValue: 360,
-          duration: 600,
+          duration: 500,
           useNativeDriver: true,
         })
       ).start();
     } else if (gameState === 'dunking') {
-      // Epic dunk trajectory
-      const hoopY = SCREEN_HEIGHT * 0.25;
+      // Epic dunk trajectory with power effects
+      const hoopY = SCREEN_HEIGHT * 0.2;
+      
+      // Power glow effect
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
       
       Animated.sequence([
-        // Arc to hoop
+        // High arc to hoop with spin
         Animated.parallel([
           Animated.timing(ballAnim, {
             toValue: { 
               x: 0,
-              y: hoopY - position.y - 20
+              y: hoopY - position.y - 30
             },
-            duration: 700,
+            duration: 800,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
-            toValue: 1.3,
-            duration: 350,
+            toValue: 1.4,
+            duration: 400,
             useNativeDriver: true,
           }),
         ]),
-        // Through hoop
+        // Slam through hoop
         Animated.parallel([
           Animated.timing(ballAnim, {
             toValue: { 
               x: 0,
-              y: hoopY - position.y + 12
+              y: hoopY - position.y + 15
             },
             duration: 300,
             useNativeDriver: true,
@@ -106,41 +123,42 @@ const Ball = ({ position, gameState }) => {
         // Reset
         Animated.timing(ballAnim, {
           toValue: { x: 0, y: 0 },
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }),
       ]).start();
 
-      // Fast spin during dunk
+      // Intense spin during dunk
       Animated.loop(
         Animated.timing(spinAnim, {
           toValue: 360,
-          duration: 100,
+          duration: 80,
           useNativeDriver: true,
         })
       ).start();
 
-      // Reset spin after dunk
+      // Reset effects after dunk
       setTimeout(() => {
         spinAnim.setValue(0);
+        glowAnim.setValue(0);
       }, 1300);
     } else if (gameState === 'layup') {
-      // Layup trajectory
-      const hoopY = SCREEN_HEIGHT * 0.25;
+      // Smooth layup trajectory
+      const hoopY = SCREEN_HEIGHT * 0.2;
       
       Animated.sequence([
         Animated.parallel([
           Animated.timing(ballAnim, {
             toValue: { 
               x: 0,
-              y: hoopY - position.y - 12
+              y: hoopY - position.y - 15
             },
-            duration: 500,
+            duration: 600,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 250,
+            toValue: 1.2,
+            duration: 300,
             useNativeDriver: true,
           }),
         ]),
@@ -148,14 +166,14 @@ const Ball = ({ position, gameState }) => {
           Animated.timing(ballAnim, {
             toValue: { 
               x: 0,
-              y: hoopY - position.y + 6
+              y: hoopY - position.y + 8
             },
-            duration: 300,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
             toValue: 1,
-            duration: 300,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
@@ -175,6 +193,59 @@ const Ball = ({ position, gameState }) => {
       }).start(() => {
         spinAnim.setValue(0);
       });
+    } else if (gameState === 'shooting') {
+      // Shooting trajectory with arc
+      const hoopY = SCREEN_HEIGHT * 0.2;
+      
+      Animated.sequence([
+        // High arc shot
+        Animated.parallel([
+          Animated.timing(ballAnim, {
+            toValue: { 
+              x: 0,
+              y: hoopY - position.y - 40
+            },
+            duration: 900,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1.3,
+            duration: 450,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Drop to hoop
+        Animated.parallel([
+          Animated.timing(ballAnim, {
+            toValue: { 
+              x: 0,
+              y: hoopY - position.y + 10
+            },
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Reset
+        Animated.timing(ballAnim, {
+          toValue: { x: 0, y: 0 },
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Perfect shooting spin
+      Animated.timing(spinAnim, {
+        toValue: 360,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start(() => {
+        spinAnim.setValue(0);
+      });
     }
   }, [gameState]);
 
@@ -183,8 +254,8 @@ const Ball = ({ position, gameState }) => {
       style={[
         styles.container,
         {
-          left: position.x - 12,
-          top: position.y - 12,
+          left: position.x - 15,
+          top: position.y - 15,
           transform: [
             { translateX: ballAnim.x },
             { translateY: Animated.add(ballAnim.y, bounceAnim) },
@@ -206,55 +277,75 @@ const Ball = ({ position, gameState }) => {
             transform: [
               { scaleX: scaleAnim },
               { scaleY: shadowAnim.interpolate({
-                inputRange: [0.6, 1],
-                outputRange: [1.4, 1]
+                inputRange: [0.5, 1.2],
+                outputRange: [1.5, 1]
               })}
             ]
           }
         ]}
       />
       
-      <Svg width={24} height={24}>
+      {/* Power glow effect for dunks */}
+      {gameState === 'dunking' && (
+        <Animated.View 
+          style={[
+            styles.glow,
+            {
+              opacity: glowAnim,
+            }
+          ]}
+        />
+      )}
+      
+      <Svg width={30} height={30}>
         <Defs>
-          {/* Basketball gradient */}
-          <RadialGradient id="ballGradient" cx="35%" cy="35%">
-            <Stop offset="0%" stopColor="#f39c12" />
-            <Stop offset="60%" stopColor="#e67e22" />
-            <Stop offset="100%" stopColor="#d35400" />
+          {/* Enhanced basketball gradient */}
+          <RadialGradient id="ballGradient" cx="30%" cy="30%">
+            <Stop offset="0%" stopColor="#F39C12" />
+            <Stop offset="40%" stopColor="#E67E22" />
+            <Stop offset="80%" stopColor="#D35400" />
+            <Stop offset="100%" stopColor="#A0522D" />
           </RadialGradient>
         </Defs>
         
         {/* Basketball sphere */}
         <Circle 
-          cx={12} 
-          cy={12} 
-          r={10} 
+          cx={15} 
+          cy={15} 
+          r={12} 
           fill="url(#ballGradient)"
-          stroke="#d35400"
-          strokeWidth={1}
+          stroke="#A0522D"
+          strokeWidth={1.5}
         />
         
         {/* Basketball seam lines */}
         <Path 
-          d="M 2 12 Q 12 4 22 12 Q 12 20 2 12"
-          stroke="#d35400" 
-          strokeWidth={1.5}
+          d="M 3 15 Q 15 5 27 15 Q 15 25 3 15"
+          stroke="#A0522D" 
+          strokeWidth={2}
           fill="none"
         />
         <Path 
-          d="M 12 2 Q 4 12 12 22 Q 20 12 12 2"
-          stroke="#d35400" 
-          strokeWidth={1.5}
+          d="M 15 3 Q 5 15 15 27 Q 25 15 15 3"
+          stroke="#A0522D" 
+          strokeWidth={2}
           fill="none"
         />
         
-        {/* Highlight for 3D effect */}
+        {/* Enhanced highlight for 3D effect */}
         <Circle 
-          cx={15} 
-          cy={9} 
-          r={2.5} 
-          fill="#f1c40f"
-          opacity={0.3}
+          cx={18} 
+          cy={11} 
+          r={3} 
+          fill="#F1C40F"
+          opacity={0.4}
+        />
+        <Circle 
+          cx={19} 
+          cy={10} 
+          r={1.5} 
+          fill="#FFFFFF"
+          opacity={0.6}
         />
       </Svg>
     </Animated.View>
@@ -268,12 +359,22 @@ const styles = StyleSheet.create({
   },
   shadow: {
     position: 'absolute',
-    bottom: -12,
-    left: 4,
-    width: 16,
-    height: 4,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 8,
+    bottom: -15,
+    left: 5,
+    width: 20,
+    height: 5,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 10,
+  },
+  glow: {
+    position: 'absolute',
+    top: -5,
+    left: -5,
+    width: 40,
+    height: 40,
+    backgroundColor: '#F39C12',
+    borderRadius: 20,
+    opacity: 0.3,
   },
 });
 

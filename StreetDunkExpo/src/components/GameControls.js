@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 
-const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gameState, isMoving, stopMovement }) => {
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, onShoot, gameState, isMoving, stopMovement, nearHoop }) => {
   return (
     <View style={styles.container}>
-      {/* Movement Controls */}
-      <View style={styles.movementRow}>
+      {/* Top control bar like reference */}
+      <View style={styles.topControlBar}>
+        {/* Left movement */}
         <TouchableOpacity 
           style={[
             styles.moveButton,
@@ -15,25 +18,25 @@ const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gam
           onPressIn={onMoveLeft}
           onPressOut={stopMovement}
         >
-          <Text style={styles.moveButtonText}>⬅️</Text>
+          <Text style={styles.moveButtonText}>⬅</Text>
+          <Text style={styles.moveLabel}>STREET</Text>
         </TouchableOpacity>
         
-        <View style={styles.centerControls}>
-          <TouchableOpacity 
-            style={[
-              styles.actionButton,
-              styles.dribbleButton,
-              gameState === 'dribbling' && styles.activeButton
-            ]}
-            onPress={onDribble}
-            disabled={gameState === 'dunking' || gameState === 'layup'}
-          >
-            <Text style={styles.actionButtonText}>
-              {gameState === 'dribbling' ? '🏀' : 'DRIBBLE'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Center dribble */}
+        <TouchableOpacity 
+          style={[
+            styles.dribbleButton,
+            gameState === 'dribbling' && styles.dribbleActive
+          ]}
+          onPress={onDribble}
+          disabled={gameState === 'dunking' || gameState === 'layup' || gameState === 'shooting'}
+        >
+          <Text style={styles.dribbleText}>
+            {gameState === 'dribbling' ? '🏀' : 'DRIBBLE'}
+          </Text>
+        </TouchableOpacity>
         
+        {/* Right movement */}
         <TouchableOpacity 
           style={[
             styles.moveButton,
@@ -43,43 +46,62 @@ const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gam
           onPressIn={onMoveRight}
           onPressOut={stopMovement}
         >
-          <Text style={styles.moveButtonText}>➡️</Text>
+          <Text style={styles.moveButtonText}>➡</Text>
+          <Text style={styles.moveLabel}>BALL</Text>
         </TouchableOpacity>
       </View>
       
-      {/* Action Controls */}
-      <View style={styles.actionRow}>
-        <TouchableOpacity 
-          style={[
-            styles.actionButton,
-            styles.layupButton,
-            gameState === 'layup' && styles.activeButton
-          ]}
-          onPress={onLayup}
-          disabled={gameState !== 'ready'}
-        >
-          <Text style={styles.actionButtonText}>
-            {gameState === 'layup' ? 'LAYUP!' : 'LAYUP'}
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.dunkButton,
-            gameState === 'dunking' && styles.dunkButtonActive
-          ]}
-          onPress={onDunk}
-          disabled={gameState !== 'ready'}
-        >
-          <Text style={styles.dunkButtonText}>
-            {gameState === 'dunking' ? '🔥 SLAM! 🔥' : '💥 DUNK 💥'}
-          </Text>
-        </TouchableOpacity>
+      {/* Main action button like reference */}
+      <View style={styles.actionContainer}>
+        {nearHoop ? (
+          <View style={styles.actionRow}>
+            <TouchableOpacity 
+              style={[
+                styles.actionButton,
+                styles.layupButton,
+                gameState === 'layup' && styles.actionActive
+              ]}
+              onPress={onLayup}
+              disabled={gameState !== 'ready' && gameState !== 'dribbling'}
+            >
+              <Text style={styles.actionButtonText}>LAYUP</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                styles.actionButton,
+                styles.dunkButton,
+                gameState === 'dunking' && styles.actionActive
+              ]}
+              onPress={onDunk}
+              disabled={gameState !== 'ready' && gameState !== 'dribbling'}
+            >
+              <Text style={styles.actionButtonText}>DUNK</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={[
+              styles.shootButton,
+              gameState === 'shooting' && styles.shootActive
+            ]}
+            onPress={onShoot}
+            disabled={gameState !== 'ready' && gameState !== 'dribbling'}
+          >
+            <Text style={styles.shootButtonText}>
+              {gameState === 'shooting' ? '🏀 SHOOTING! 🏀' : '🎯 SHOOT 🎯'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
       
+      {/* Instruction text like reference */}
       <View style={styles.instructionContainer}>
         <Text style={styles.instructionText}>
-          Move with ⬅️➡️ • Dribble to the hoop • DUNK or LAYUP to score!
+          {nearHoop 
+            ? "Move with ⬅️➡️ • Near hoop: DUNK or LAYUP to score!" 
+            : "Move with ⬅️➡️ • Away from hoop: SHOOT for points!"
+          }
         </Text>
       </View>
     </View>
@@ -89,34 +111,26 @@ const GameControls = ({ onMoveLeft, onMoveRight, onDunk, onLayup, onDribble, gam
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-    alignItems: 'center',
+    bottom: 0,
+    left: 0,
+    right: 0,
     zIndex: 3,
+    paddingBottom: 20,
   },
-  movementRow: {
+  topControlBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 15,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 15,
-  },
-  centerControls: {
-    flex: 1,
-    alignItems: 'center',
-    marginHorizontal: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: 'rgba(52, 73, 94, 0.9)',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   moveButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -126,76 +140,110 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   leftButton: {
-    backgroundColor: '#9b59b6',
+    backgroundColor: '#9B59B6',
   },
   rightButton: {
-    backgroundColor: '#9b59b6',
+    backgroundColor: '#9B59B6',
   },
-  actionButton: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 20,
-    marginHorizontal: 5,
-    elevation: 3,
+  dribbleButton: {
+    backgroundColor: '#F39C12',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-  dribbleButton: {
-    backgroundColor: '#f39c12',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+  activeButton: {
+    backgroundColor: '#27AE60',
+    transform: [{ scale: 1.1 }],
   },
-  layupButton: {
-    backgroundColor: '#3498db',
+  dribbleActive: {
+    backgroundColor: '#E67E22',
+    transform: [{ scale: 1.05 }],
   },
-  dunkButton: {
-    backgroundColor: '#e74c3c',
-    flex: 1,
+  moveButtonText: {
+    fontSize: 24,
+    color: '#FFFFFF',
+  },
+  moveLabel: {
+    fontSize: 10,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  dribbleText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  actionContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 15,
     borderRadius: 25,
+    marginHorizontal: 10,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
-    marginHorizontal: 5,
   },
-  activeButton: {
-    backgroundColor: '#27ae60',
-    transform: [{ scale: 1.1 }],
+  layupButton: {
+    backgroundColor: '#3498DB',
   },
-  dunkButtonActive: {
-    backgroundColor: '#c0392b',
+  dunkButton: {
+    backgroundColor: '#E74C3C',
+  },
+  shootButton: {
+    backgroundColor: '#8E44AD',
+    paddingVertical: 20,
+    borderRadius: 30,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  actionActive: {
     transform: [{ scale: 1.05 }],
   },
-  moveButtonText: {
-    fontSize: 24,
+  shootActive: {
+    backgroundColor: '#6C3483',
+    transform: [{ scale: 1.02 }],
   },
   actionButtonText: {
-    color: '#ecf0f1',
-    fontSize: 12,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  dunkButtonText: {
-    color: '#ecf0f1',
-    fontSize: 14,
+  shootButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   instructionContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    marginHorizontal: 20,
     borderRadius: 20,
   },
   instructionText: {
-    color: '#ecf0f1',
-    fontSize: 11,
+    color: '#FFFFFF',
+    fontSize: 12,
     textAlign: 'center',
     fontStyle: 'italic',
   },
