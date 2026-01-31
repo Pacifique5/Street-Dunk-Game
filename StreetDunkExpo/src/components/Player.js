@@ -11,127 +11,148 @@ const Player = ({ position, gameState, direction = 'right' }) => {
   const runAnim = useRef(new Animated.Value(0)).current;
   const legAnim = useRef(new Animated.Value(0)).current;
   const bodyAnim = useRef(new Animated.Value(0)).current;
+  const ballHandAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (gameState === 'running') {
-      // Enhanced running animation with leg movement
+      // Smooth running animation with ball handling
       Animated.loop(
         Animated.sequence([
           Animated.parallel([
             Animated.timing(runAnim, {
               toValue: 1,
-              duration: 120,
+              duration: 100,
               useNativeDriver: true,
             }),
             Animated.timing(legAnim, {
               toValue: 1,
-              duration: 120,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ballHandAnim, {
+              toValue: 1,
+              duration: 200,
               useNativeDriver: true,
             }),
           ]),
           Animated.parallel([
             Animated.timing(runAnim, {
               toValue: 0,
-              duration: 120,
+              duration: 100,
               useNativeDriver: true,
             }),
             Animated.timing(legAnim, {
               toValue: 0,
-              duration: 120,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ballHandAnim, {
+              toValue: 0,
+              duration: 200,
               useNativeDriver: true,
             }),
           ]),
         ])
       ).start();
     } else if (gameState === 'dribbling') {
-      // Enhanced dribbling animation with body movement
+      // Enhanced dribbling with realistic ball handling
       Animated.loop(
         Animated.sequence([
           Animated.parallel([
             Animated.timing(dribbleAnim, {
               toValue: 1,
-              duration: 200,
+              duration: 150,
               useNativeDriver: true,
             }),
             Animated.timing(bodyAnim, {
               toValue: 1,
-              duration: 200,
+              duration: 150,
+              useNativeDriver: true,
+            }),
+            Animated.timing(armAnim, {
+              toValue: 0.5,
+              duration: 150,
               useNativeDriver: true,
             }),
           ]),
           Animated.parallel([
             Animated.timing(dribbleAnim, {
               toValue: 0,
-              duration: 200,
+              duration: 150,
               useNativeDriver: true,
             }),
             Animated.timing(bodyAnim, {
               toValue: 0,
-              duration: 200,
+              duration: 150,
+              useNativeDriver: true,
+            }),
+            Animated.timing(armAnim, {
+              toValue: 0,
+              duration: 150,
               useNativeDriver: true,
             }),
           ]),
         ])
       ).start();
     } else if (gameState === 'dunking') {
-      // Epic dunk animation with multiple phases
+      // Epic dunk sequence with multiple phases
       Animated.sequence([
-        // Crouch preparation
+        // Preparation crouch
         Animated.parallel([
           Animated.timing(scaleAnim, {
-            toValue: 0.7,
-            duration: 200,
+            toValue: 0.6,
+            duration: 150,
             useNativeDriver: true,
           }),
           Animated.timing(bodyAnim, {
             toValue: 1,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
         ]),
-        // Explosive jump with spin and arm extension
+        // Explosive jump with 360 spin
         Animated.parallel([
           Animated.timing(jumpAnim, {
-            toValue: -120,
-            duration: 800,
+            toValue: -140,
+            duration: 900,
             useNativeDriver: true,
           }),
           Animated.timing(rotateAnim, {
             toValue: direction === 'right' ? 360 : -360,
-            duration: 1000,
+            duration: 1100,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
-            toValue: 1.4,
-            duration: 400,
+            toValue: 1.5,
+            duration: 450,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
-            toValue: 1,
-            duration: 600,
+            toValue: 1.5,
+            duration: 700,
             useNativeDriver: true,
           }),
         ]),
-        // Landing with impact
+        // Powerful landing
         Animated.parallel([
           Animated.timing(jumpAnim, {
             toValue: 0,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
             toValue: 1,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
             toValue: 0,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
           Animated.timing(bodyAnim, {
             toValue: 0,
-            duration: 200,
+            duration: 150,
             useNativeDriver: true,
           }),
         ]),
@@ -139,63 +160,78 @@ const Player = ({ position, gameState, direction = 'right' }) => {
         rotateAnim.setValue(0);
       });
     } else if (gameState === 'layup') {
-      // Smooth layup animation
+      // Graceful layup animation
       Animated.sequence([
         Animated.parallel([
           Animated.timing(jumpAnim, {
-            toValue: -80,
-            duration: 600,
+            toValue: -90,
+            duration: 700,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
-            toValue: 1,
-            duration: 400,
+            toValue: 1.2,
+            duration: 500,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
-            toValue: 1.2,
-            duration: 300,
+            toValue: 1.3,
+            duration: 350,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bodyAnim, {
+            toValue: 0.5,
+            duration: 350,
             useNativeDriver: true,
           }),
         ]),
         Animated.parallel([
           Animated.timing(jumpAnim, {
             toValue: 0,
-            duration: 400,
+            duration: 350,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
             toValue: 0,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim, {
             toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bodyAnim, {
+            toValue: 0,
             duration: 200,
             useNativeDriver: true,
           }),
         ]),
       ]).start();
     } else if (gameState === 'shooting') {
-      // Shooting animation with follow-through
+      // Shooting form with follow-through
       Animated.sequence([
-        // Shooting preparation
+        // Setup shot
         Animated.parallel([
           Animated.timing(jumpAnim, {
-            toValue: -40,
-            duration: 300,
+            toValue: -50,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.timing(armAnim, {
             toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1.1,
             duration: 200,
             useNativeDriver: true,
           }),
         ]),
-        // Follow through
+        // Release and follow through
         Animated.timing(armAnim, {
-          toValue: 1.5,
-          duration: 400,
+          toValue: 1.8,
+          duration: 500,
           useNativeDriver: true,
         }),
         // Return to position
@@ -210,6 +246,11 @@ const Player = ({ position, gameState, direction = 'right' }) => {
             duration: 300,
             useNativeDriver: true,
           }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
         ]),
       ]).start();
     }
@@ -218,35 +259,42 @@ const Player = ({ position, gameState, direction = 'right' }) => {
   const getRunBounce = () => {
     return runAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, -5]
+      outputRange: [0, -6]
     });
   };
 
   const getDribbleBounce = () => {
     return dribbleAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, -8]
+      outputRange: [0, -10]
     });
   };
 
   const getArmRotation = () => {
     return armAnim.interpolate({
-      inputRange: [0, 1, 1.5],
-      outputRange: ['0deg', direction === 'right' ? '45deg' : '-45deg', direction === 'right' ? '60deg' : '-60deg']
+      inputRange: [0, 0.5, 1, 1.2, 1.5, 1.8],
+      outputRange: ['0deg', '15deg', '45deg', '60deg', '75deg', '90deg']
     });
   };
 
   const getLegMovement = () => {
     return legAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, 3]
+      outputRange: [0, 4]
     });
   };
 
   const getBodyLean = () => {
     return bodyAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0deg', direction === 'right' ? '5deg' : '-5deg']
+      outputRange: ['0deg', direction === 'right' ? '8deg' : '-8deg']
+    });
+  };
+
+  const getBallHandMovement = () => {
+    return ballHandAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, -3]
     });
   };
 
@@ -255,8 +303,8 @@ const Player = ({ position, gameState, direction = 'right' }) => {
       style={[
         styles.container,
         {
-          left: position.x - 25,
-          top: position.y - 55,
+          left: position.x - 30,
+          top: position.y - 65,
           transform: [
             { translateY: Animated.add(jumpAnim, Animated.add(getRunBounce(), getDribbleBounce())) },
             { rotate: rotateAnim.interpolate({
@@ -269,95 +317,105 @@ const Player = ({ position, gameState, direction = 'right' }) => {
         }
       ]}
     >
-      <Svg width={50} height={60}>
-        {/* Player Shadow */}
+      <Svg width={60} height={70}>
+        {/* Enhanced Player Shadow */}
         <Ellipse 
-          cx={25} 
-          cy={57} 
-          rx={12} 
-          ry={3} 
-          fill="rgba(0,0,0,0.4)"
+          cx={30} 
+          cy={67} 
+          rx={15} 
+          ry={4} 
+          fill="rgba(0,0,0,0.5)"
         />
         
-        {/* Animated Legs */}
-        <Animated.View style={{ transform: [{ rotate: getBodyLean() }] }}>
+        {/* Animated Legs with running motion */}
+        <Animated.View style={{ 
+          transform: [
+            { rotate: getBodyLean() },
+            { translateY: getLegMovement() }
+          ] 
+        }}>
           <Rect 
-            x={18} 
-            y={35} 
-            width={5} 
-            height={18} 
+            x={22} 
+            y={40} 
+            width={6} 
+            height={22} 
             fill="#2C3E50"
-            rx={2}
+            rx={3}
           />
           <Rect 
-            x={27} 
-            y={35} 
-            width={5} 
-            height={18} 
+            x={32} 
+            y={40} 
+            width={6} 
+            height={22} 
             fill="#2C3E50"
-            rx={2}
+            rx={3}
           />
         </Animated.View>
         
-        {/* Enhanced Shoes */}
+        {/* Enhanced Basketball Shoes */}
         <Ellipse 
-          cx={20} 
-          cy={54} 
-          rx={6} 
-          ry={3} 
+          cx={25} 
+          cy={63} 
+          rx={8} 
+          ry={4} 
           fill="#E74C3C"
         />
         <Ellipse 
-          cx={30} 
-          cy={54} 
-          rx={6} 
-          ry={3} 
+          cx={35} 
+          cy={63} 
+          rx={8} 
+          ry={4} 
           fill="#E74C3C"
         />
         
-        {/* Jersey/Body with animation */}
+        {/* Jersey/Body with dynamic lean */}
         <Animated.View style={{ transform: [{ rotate: getBodyLean() }] }}>
           <Rect 
-            x={15} 
-            y={18} 
-            width={20} 
-            height={20} 
+            x={18} 
+            y={20} 
+            width={24} 
+            height={24} 
             fill="#3498DB"
-            rx={3}
+            rx={4}
           />
         </Animated.View>
         
         {/* Jersey Number */}
         <Circle 
-          cx={25} 
-          cy={26} 
-          r={5} 
+          cx={30} 
+          cy={30} 
+          r={6} 
           fill="#FFFFFF"
         />
         <Circle 
-          cx={25} 
-          cy={26} 
-          r={3} 
+          cx={30} 
+          cy={30} 
+          r={4} 
           fill="#3498DB"
         />
         
-        {/* Animated Arms */}
-        <Animated.View style={{ transform: [{ rotate: getArmRotation() }] }}>
+        {/* Animated Arms with ball handling */}
+        <Animated.View style={{ 
+          transform: [
+            { rotate: getArmRotation() },
+            { translateY: getBallHandMovement() }
+          ] 
+        }}>
           {/* Left arm */}
           <Rect 
-            x={8} 
-            y={20} 
-            width={12} 
-            height={4} 
+            x={10} 
+            y={23} 
+            width={14} 
+            height={5} 
             fill="#F39C12"
             rx={2}
           />
           {/* Right arm */}
           <Rect 
-            x={30} 
-            y={20} 
-            width={12} 
-            height={4} 
+            x={36} 
+            y={23} 
+            width={14} 
+            height={5} 
             fill="#F39C12"
             rx={2}
           />
@@ -365,51 +423,51 @@ const Player = ({ position, gameState, direction = 'right' }) => {
         
         {/* Hands */}
         <Circle 
-          cx={6} 
-          cy={22} 
-          r={3} 
+          cx={8} 
+          cy={25} 
+          r={4} 
           fill="#F39C12"
         />
         <Circle 
-          cx={44} 
-          cy={22} 
-          r={3} 
+          cx={52} 
+          cy={25} 
+          r={4} 
           fill="#F39C12"
         />
         
         {/* Head */}
         <Circle 
-          cx={25} 
-          cy={14} 
-          r={7} 
+          cx={30} 
+          cy={16} 
+          r={8} 
           fill="#F39C12"
         />
         
         {/* Hair */}
         <Path 
-          d="M18 8 Q25 4 32 8 Q28 6 25 6 Q22 6 18 8"
+          d="M22 9 Q30 5 38 9 Q34 7 30 7 Q26 7 22 9"
           fill="#2C3E50"
         />
         
-        {/* Eyes */}
+        {/* Eyes with focus */}
         <Circle 
-          cx={22} 
-          cy={13} 
-          r={1} 
+          cx={27} 
+          cy={15} 
+          r={1.2} 
           fill="#2C3E50"
         />
         <Circle 
-          cx={28} 
-          cy={13} 
-          r={1} 
+          cx={33} 
+          cy={15} 
+          r={1.2} 
           fill="#2C3E50"
         />
         
-        {/* Mouth */}
+        {/* Determined mouth */}
         <Path 
-          d="M22 16 Q25 17 28 16"
+          d="M27 18 Q30 19 33 18"
           stroke="#2C3E50"
-          strokeWidth={1}
+          strokeWidth={1.2}
           fill="none"
         />
         
@@ -417,19 +475,27 @@ const Player = ({ position, gameState, direction = 'right' }) => {
         {gameState === 'running' && (
           <>
             <Line 
-              x1={direction === 'right' ? 2 : 48} 
-              y1={18} 
-              x2={direction === 'right' ? -3 : 53} 
-              y2={16} 
-              stroke="rgba(255,255,255,0.8)" 
+              x1={direction === 'right' ? 5 : 55} 
+              y1={20} 
+              x2={direction === 'right' ? 0 : 60} 
+              y2={18} 
+              stroke="rgba(255,255,255,0.9)" 
+              strokeWidth={2.5}
+            />
+            <Line 
+              x1={direction === 'right' ? 8 : 52} 
+              y1={35} 
+              x2={direction === 'right' ? 3 : 57} 
+              y2={33} 
+              stroke="rgba(255,255,255,0.7)" 
               strokeWidth={2}
             />
             <Line 
-              x1={direction === 'right' ? 5 : 45} 
-              y1={30} 
-              x2={direction === 'right' ? 0 : 50} 
-              y2={28} 
-              stroke="rgba(255,255,255,0.6)" 
+              x1={direction === 'right' ? 12 : 48} 
+              y1={50} 
+              x2={direction === 'right' ? 7 : 53} 
+              y2={48} 
+              stroke="rgba(255,255,255,0.5)" 
               strokeWidth={1.5}
             />
           </>
@@ -439,20 +505,58 @@ const Player = ({ position, gameState, direction = 'right' }) => {
         {gameState === 'dunking' && (
           <>
             <Circle 
-              cx={25} 
-              cy={30} 
-              r={20} 
+              cx={30} 
+              cy={35} 
+              r={25} 
               fill="none" 
-              stroke="rgba(231, 76, 60, 0.6)" 
+              stroke="rgba(231, 76, 60, 0.7)" 
+              strokeWidth={4}
+            />
+            <Circle 
+              cx={30} 
+              cy={35} 
+              r={18} 
+              fill="none" 
+              stroke="rgba(241, 196, 15, 0.9)" 
               strokeWidth={3}
             />
             <Circle 
-              cx={25} 
-              cy={30} 
-              r={15} 
+              cx={30} 
+              cy={35} 
+              r={12} 
               fill="none" 
-              stroke="rgba(241, 196, 15, 0.8)" 
+              stroke="rgba(255, 255, 255, 0.8)" 
               strokeWidth={2}
+            />
+          </>
+        )}
+        
+        {/* Focus lines during shooting */}
+        {gameState === 'shooting' && (
+          <>
+            <Line 
+              x1={30} 
+              y1={5} 
+              x2={30} 
+              y2={0} 
+              stroke="rgba(52, 152, 219, 0.8)" 
+              strokeWidth={2}
+            />
+            <Line 
+              x1={25} 
+              y1={8} 
+              x2={20} 
+              y2={3} 
+              stroke="rgba(52, 152, 219, 0.6)" 
+              strokeWidth={1.5}
+            />
+            <Line 
+              x1={35} 
+              y1={8} 
+              x2={40} 
+              y2={3} 
+              stroke="rgba(52, 152, 219, 0.6)" 
+              strokeWidth={1.5}
             />
           </>
         )}
